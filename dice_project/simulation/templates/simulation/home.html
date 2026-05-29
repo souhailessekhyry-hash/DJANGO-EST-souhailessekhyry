@@ -1,0 +1,137 @@
+{% extends "simulation/base.html" %}
+{% load static %}
+
+{% block title %}Simulation de lancers de dés{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="hero">
+    <h1>🎲 Loi des Grands Nombres</h1>
+    <p style="font-size: 1.1rem; opacity: 0.9; margin: 0.5rem 0;">
+        Simulez le lancer de deux dés et observez la convergence vers <strong>1/6 ≈ 0.167</strong>
+    </p>
+    <div class="badge-custom">P(dés égaux) = 6/36 = 1/6</div>
+</div>
+
+<!-- Table de jeu -->
+<div class="game-table">
+    <h2>🎲 Lancez les dés</h2>
+
+    <div class="dice-wrapper">
+        <div class="text-center">
+            <div class="dice" id="dice1">⚀</div>
+            <div class="dice-label">Dé 1</div>
+        </div>
+        <div class="dice-plus">+</div>
+        <div class="text-center">
+            <div class="dice" id="dice2">⚀</div>
+            <div class="dice-label">Dé 2</div>
+        </div>
+    </div>
+
+    <div class="result-box" id="result">
+        <span style="color: rgba(255,255,255,0.3);">Cliquez sur le bouton pour lancer les dés 🎲</span>
+    </div>
+
+    <div class="stats-session">
+        <div class="stat-item">
+            <span class="val gold" id="totalLancers">{{ session_total }}</span>
+            <span class="lbl">Lancers</span>
+        </div>
+        <div class="stat-item">
+            <span class="val green" id="totalEgaux">{{ session_egaux }}</span>
+            <span class="lbl">Paires</span>
+        </div>
+        <div class="stat-item">
+            <span class="val blue" id="freqLive">
+                {% if session_total > 0 %}{{ session_frequence }}{% else %}—{% endif %}
+            </span>
+            <span class="lbl">Fréquence</span>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button class="btn-roll" id="btnRoll">🎲 Lancer les dés</button>
+    </div>
+</div>
+
+<!-- Graphique de convergence Chart.js -->
+<div class="card-sim">
+    <div class="header dark">📈 Convergence vers 1/6 (graphique dynamique)</div>
+    <div class="body">
+        <div class="chart-container">
+            <canvas id="convergenceChart" height="250"></canvas>
+        </div>
+        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); text-align: center;">
+            Chaque point = votre fréquence après N lancers. La ligne rouge = 1/6.
+            Plus vous lancez, plus les points se rapprochent de la ligne.
+        </p>
+    </div>
+</div>
+
+<!-- 10 lancers initiaux -->
+<div class="card-sim">
+    <div class="header purple">🔟 10 lancers initiaux</div>
+    <div class="body">
+        <div style="overflow-x: auto;">
+            <table class="table-sim">
+                <thead>
+                    <tr><th>#</th><th>Dé 1</th><th>Dé 2</th><th>Résultat</th><th>Égalité</th></tr>
+                </thead>
+                <tbody>
+                    {% for l in lancers_bruts %}
+                    <tr class="{% if l.egaux %}row-ok{% endif %}">
+                        <td><strong>N°{{ forloop.counter }}</strong></td>
+                        <td style="font-size: 1.3rem;">{% if l.de1 == 1 %}⚀{% elif l.de1 == 2 %}⚁{% elif l.de1 == 3 %}⚂{% elif l.de1 == 4 %}⚃{% elif l.de1 == 5 %}⚄{% else %}⚅{% endif %} {{ l.de1 }}</td>
+                        <td style="font-size: 1.3rem;">{% if l.de2 == 1 %}⚀{% elif l.de2 == 2 %}⚁{% elif l.de2 == 3 %}⚂{% elif l.de2 == 4 %}⚃{% elif l.de2 == 5 %}⚄{% else %}⚅{% endif %} {{ l.de2 }}</td>
+                        <td>{% if l.egaux %}<span class="badge-s">{{ l.de1 }} = {{ l.de2 }}</span>{% else %}<span class="badge-l">{{ l.de1 }} ≠ {{ l.de2 }}</span>{% endif %}</td>
+                        <td>{% if l.egaux %}✅ Succès{% else %}❌{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Tableau de convergence -->
+<div class="card-sim">
+    <div class="header dark">📊 Convergence vers la probabilité théorique</div>
+    <div class="body">
+        <div style="overflow-x: auto;">
+            <table class="table-sim">
+                <thead>
+                    <tr><th>Lancers (N)</th><th>Fréquence</th><th>Théorique</th><th>Écart</th><th>Convergence</th></tr>
+                </thead>
+                <tbody>
+                    {% for s in simulations %}
+                    <tr class="{% if s.taille >= 1000 %}row-ok{% endif %}">
+                        <td><strong>{{ s.taille }}</strong></td>
+                        <td style="font-weight: 700;">{{ s.frequence }}</td>
+                        <td>{{ s.theorique }}</td>
+                        <td>{{ s.difference }}</td>
+                        <td>{% if s.difference <= 0.01 %}<span class="badge-s">Très proche</span>{% elif s.difference <= 0.05 %}<span class="badge-m">Proche</span>{% else %}<span class="badge-l">Éloigné</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="alert-info-custom mt-3">
+            <strong>🔍 Observation :</strong> Plus N est grand, plus la fréquence se rapproche de <strong>{{ probabilite_theorique }}</strong>. C'est la <strong>loi des grands nombres</strong> !
+        </div>
+    </div>
+</div>
+
+<!-- Lien cours -->
+<div style="text-align: center; margin-bottom: 2rem; padding: 2rem; background: rgba(102,126,234,0.08); border-radius: 20px; border: 1px solid rgba(102,126,234,0.2);">
+    <h4 style="color: white; font-weight: 700;">📚 Apprenez Python et Django</h4>
+    <p style="color: rgba(255,255,255,0.5);">Exceptions, POO, et modèles Django expliqués simplement.</p>
+    <a href="{% url 'simulation:cours_python' %}" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 36px; border-radius: 14px; font-weight: 700; text-decoration: none; display: inline-block; box-shadow: 0 5px 25px rgba(102,126,234,0.3);">📖 Voir le cours Python</a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'simulation/js/dice.js' %}"></script>
+{% endblock %}

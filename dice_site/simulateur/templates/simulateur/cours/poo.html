@@ -1,0 +1,146 @@
+{% extends "simulateur/base.html" %}
+{% load static %}
+
+{% block title %}Cours Python — POO{% endblock %}
+
+{% block content %}
+<div class="section-card">
+    <div class="section-card-header" style="font-size:1.2rem;color:var(--purple);background:rgba(139,92,246,0.06);">
+        🧩 Partie 2 — Programmation Orientée Objet
+    </div>
+    <div class="section-card-body">
+        <p class="lead" style="font-size:1rem;color:var(--text);margin-bottom:1.5rem;">
+            La <strong>POO</strong> est un paradigme qui permet d'organiser le code
+            en regroupant données et comportements dans des <strong>classes</strong>.
+        </p>
+
+        <h4 style="color:var(--purple);font-weight:700;margin-bottom:0.8rem;">1. Classe et objet</h4>
+        <p style="margin-bottom:0.5rem;">
+            Une <strong>classe</strong> est un modèle qui définit la structure et le
+            comportement d'un objet. Un <strong>objet</strong> est une instance d'une classe.
+        </p>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem;"><code>class De:
+    """Modèle d'un dé à 6 faces."""
+
+    def __init__(self, faces=6):
+        self.faces = faces      # Attribut d'instance
+        self.valeur = 1
+
+    def lancer(self):
+        """Méthode : simule le lancer du dé."""
+        import random
+        self.valeur = random.randint(1, self.faces)
+        return self.valeur
+
+# Création d'objets (instances)
+de1 = De()      # dé à 6 faces
+de2 = De(20)    # dé à 20 faces
+
+# Appel de méthode
+resultat = de1.lancer()
+print(f"Le dé 1 donne {resultat}")</code></pre>
+
+        <h4 style="color:var(--purple);font-weight:700;margin-bottom:0.8rem;">2. Attributs et méthodes</h4>
+        <p style="margin-bottom:0.5rem;">
+            Les <strong>attributs</strong> stockent l'état de l'objet.
+            Les <strong>méthodes</strong> définissent son comportement.
+        </p>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem;"><code>class LancerDouble:
+    """Gère le lancer de deux dés et l'analyse du résultat."""
+
+    def __init__(self, de1, de2):
+        self.de1 = de1
+        self.de2 = de2
+        self.somme = 0
+        self.double = False
+
+    def effectuer(self):
+        valeur1 = self.de1.lancer()
+        valeur2 = self.de2.lancer()
+        self.somme = valeur1 + valeur2
+        self.double = (valeur1 == valeur2)
+        return valeur1, valeur2
+
+    def est_double(self):
+        return self.double
+
+    def afficher(self):
+        print(f"{self.de1.valeur} + {self.de2.valeur} = {self.somme}")
+        if self.double:
+            print("→ Double !")</code></pre>
+
+        <h4 style="color:var(--purple);font-weight:700;margin-bottom:0.8rem;">3. Héritage</h4>
+        <p style="margin-bottom:0.5rem;">
+            L'<strong>héritage</strong> permet à une classe de réutiliser le code
+            d'une autre classe.
+        </p>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem;"><code>class DePondere(De):
+    """Dé truqué qui hérite de De."""
+
+    def __init__(self, faces=6, poids=None):
+        super().__init__(faces)     # Appel du constructeur parent
+        self.poids = poids or [1] * faces
+
+    def lancer(self):
+        """Surcharge de la méthode lancer avec pondération."""
+        import random
+        self.valeur = random.choices(
+            range(1, self.faces + 1),
+            weights=self.poids,
+            k=1
+        )[0]
+        return self.valeur</code></pre>
+
+        <h4 style="color:var(--purple);font-weight:700;margin-bottom:0.8rem;">4. POO en Django</h4>
+        <p style="margin-bottom:0.5rem;">
+            Django utilise intensivement la POO pour ses <strong>Models</strong>,
+            ses <strong>Vues basées sur les classes</strong>, et ses <strong>Forms</strong>.
+        </p>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem;"><code># Modèle Django (models.py) — héritage de django.db.models.Model
+from django.db import models
+
+class SimulationResult(models.Model):
+    """Table en base de données via héritage de Model."""
+    nb_experiences = models.IntegerField()
+    frequence = models.FloatField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Simulation n°{self.id} — {self.frequence}"
+
+# Vue basée sur une classe (cbv)
+from django.views.generic import ListView
+
+class SimulationListView(ListView):
+    model = SimulationResult
+    template_name = "simulations/liste.html"
+    context_object_name = "simulations"
+    ordering = ["-date"]</code></pre>
+
+        <h4 style="color:var(--purple);font-weight:700;margin-bottom:0.8rem;">5. Récapitulatif</h4>
+        <div style="overflow-x:auto;margin-bottom:1rem;">
+            <table class="simulation-table">
+                <thead>
+                    <tr><th>Concept</th><th>Définition</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Classe</strong></td><td>Modèle / plan de construction</td></tr>
+                    <tr><td><strong>Objet</strong></td><td>Instance concrète d'une classe</td></tr>
+                    <tr><td><strong>Attribut</strong></td><td>Variable attachée à un objet</td></tr>
+                    <tr><td><strong>Méthode</strong></td><td>Fonction attachée à une classe</td></tr>
+                    <tr><td><strong>Constructeur</strong></td><td><code>__init__</code> : initialise l'objet</td></tr>
+                    <tr><td><strong>Héritage</strong></td><td>Une classe fille hérite d'une classe parente</td></tr>
+                    <tr><td><strong>Surcharge</strong></td><td>Redéfinir une méthode héritée</td></tr>
+                    <tr><td><code>super()</code></td><td>Appel du constructeur / méthode parent</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mt-3" style="gap:1rem;">
+    <a href="{% url 'simulateur:cours_exceptions' %}" class="btn-game btn-outline">← Partie 1 : Exceptions</a>
+    <a href="{% url 'simulateur:cours_index' %}" class="btn-game btn-secondary">Sommaire</a>
+    <a href="{% url 'simulateur:cours_exemple' %}" class="btn-game btn-primary">Partie 3 : Exemple →</a>
+</div>
+{% endblock %}

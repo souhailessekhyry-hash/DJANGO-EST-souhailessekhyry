@@ -1,0 +1,170 @@
+{% extends "simulation/base.html" %}
+{% load static %}
+
+{% block title %}Cours Python - Exceptions & POO{% endblock %}
+
+{% block content %}
+
+<div class="hero" style="background: linear-gradient(135deg, #28a745, #20c997);">
+    <h1>📖 Cours Python</h1>
+    <p style="font-size: 1.1rem; opacity: 0.9;">Gestion des exceptions &amp; Programmation Orientée Objet</p>
+</div>
+
+<div class="row g-4">
+    <!-- PARTIE A : EXCEPTIONS -->
+    <div class="col-lg-6">
+        <div class="card-sim h-100">
+            <div class="header" style="background: rgba(255,193,7,0.15); color: #ffc107;">
+                ⚠️ A. Gestion des exceptions
+            </div>
+            <div class="body cours-section">
+                <p>Les <strong>exceptions</strong> sont des erreurs qui surviennent pendant l'exécution. Python permet de les capturer pour éviter que le programme ne plante.</p>
+
+                <h4>1. try / except</h4>
+                <p><code>try</code> contient le code dangereux, <code>except</code> gère l'erreur.</p>
+                <pre><code>try:
+    nombre = int(input("Entrez un nombre : "))
+    resultat = 10 / nombre
+    print(f"Résultat : {resultat}")
+except ZeroDivisionError:
+    print("Division par zéro interdite !")
+except ValueError:
+    print("Veuillez entrer un nombre valide.")</code></pre>
+
+                <h4>2. ValueError</h4>
+                <p>Levee quand une fonction reçoit une valeur inappropriée.</p>
+                <pre><code>try:
+    age = int(input("Âge : "))
+    if age &lt; 0:
+        raise ValueError("Âge négatif impossible.")
+except ValueError as e:
+    print(f"Erreur : {e}")</code></pre>
+
+                <h4>3. Gestion des erreurs Django</h4>
+                <pre><code># Vue Django avec gestion d'erreur
+from django.http import Http404
+
+def detail_simulation(request, id):
+    try:
+        sim = SimulationResult.objects.get(id=id)
+    except SimulationResult.DoesNotExist:
+        raise Http404("Simulation introuvable.")
+    except Exception as e:
+        return render(request, "erreur.html", {"msg": str(e)})
+    return render(request, "detail.html", {"sim": sim})</code></pre>
+
+                <h5>Tableau récapitulatif</h5>
+                <div style="overflow-x: auto;">
+                    <table class="table-cours">
+                        <thead><tr><th>Exception</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>ValueError</code></td><td>Valeur incorrecte</td></tr>
+                            <tr><td><code>TypeError</code></td><td>Type incompatible</td></tr>
+                            <tr><td><code>ZeroDivisionError</code></td><td>Division par zéro</td></tr>
+                            <tr><td><code>FileNotFoundError</code></td><td>Fichier introuvable</td></tr>
+                            <tr><td><code>ObjectDoesNotExist</code></td><td>Objet Django introuvable</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PARTIE B : POO -->
+    <div class="col-lg-6">
+        <div class="card-sim h-100">
+            <div class="header" style="background: rgba(102,126,234,0.15); color: #8b9eff;">
+                🧱 B. Programmation Orientée Objet
+            </div>
+            <div class="body cours-section">
+                <p>La <strong>POO</strong> organise le code autour d'<em>objets</em> qui ont des attributs (données) et des méthodes (comportements).</p>
+
+                <h4>1. Classes et objets</h4>
+                <p>Une <strong>classe</strong> est un modèle. Un <strong>objet</strong> est une instance.</p>
+                <pre><code>class De:
+    """Représente un dé à 6 faces."""
+    def __init__(self, faces=6):
+        self.faces = faces
+        self.valeur = None
+
+    def lancer(self):
+        self.valeur = random.randint(1, self.faces)
+        return self.valeur
+
+# Création d'objets
+de1 = De()
+de2 = De(6)
+print(de1.lancer())  # 4 par exemple</code></pre>
+
+                <h4>2. Attributs et méthodes</h4>
+                <p><strong>Attributs</strong> = variables de l'objet. <strong>Méthodes</strong> = fonctions de l'objet.</p>
+                <pre><code>class Simulation:
+    proba_theorique = 1 / 6  # Attribut de classe
+
+    def __init__(self, nb):
+        self.nb = nb           # Attribut d'instance
+        self.frequence = 0.0
+
+    def executer(self):        # Méthode
+        succes = 0
+        for _ in range(self.nb):
+            d1, d2 = random.randint(1,6), random.randint(1,6)
+            if d1 == d2: succes += 1
+        self.frequence = succes / self.nb
+        return self.frequence</code></pre>
+
+                <h4>3. Héritage simple</h4>
+                <p>Une classe <strong>fille</strong> hérite de la classe <strong>mère</strong>.</p>
+                <pre><code>class De:
+    def lancer(self):
+        return random.randint(1, 6)
+
+class DePondere(De):  # Héritage
+    def __init__(self, valeur_forcee=None):
+        self.valeur_forcee = valeur_forcee
+
+    def lancer(self):  # Surcharge
+        if self.valeur_forcee:
+            return self.valeur_forcee
+        return super().lancer()</code></pre>
+
+                <h4>4. POO dans Django Models</h4>
+                <p>Chaque modèle Django est une classe qui hérite de <code>models.Model</code>.</p>
+                <pre><code>from django.db import models
+
+class SimulationResult(models.Model):
+    # Attributs = champs de la table
+    nb_experiences = models.IntegerField()
+    frequence = models.FloatField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nb_experiences} → {self.frequence:.4f}"
+
+    def est_proche(self):
+        return abs(self.frequence - 1/6) &lt; 0.01</code></pre>
+
+                <h5>Tableau récapitulatif POO</h5>
+                <div style="overflow-x: auto;">
+                    <table class="table-cours">
+                        <thead><tr><th>Concept</th><th>Définition</th><th>Django</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Classe</strong></td><td>Plan</td><td><code>class MonModele(models.Model)</code></td></tr>
+                            <tr><td><strong>Objet</strong></td><td>Instance</td><td><code>MonModele.objects.get(id=1)</code></td></tr>
+                            <tr><td><strong>Attribut</strong></td><td>Variable</td><td><code>champ = models.IntegerField()</code></td></tr>
+                            <tr><td><strong>Méthode</strong></td><td>Fonction</td><td><code>def __str__(self):</code></td></tr>
+                            <tr><td><strong>Héritage</strong></td><td>Fille ← Mère</td><td><code>class ...(models.Model)</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lien retour -->
+<div style="text-align: center; margin: 2rem 0;">
+    <a href="{% url 'simulation:home' %}" class="btn-roll" style="display: inline-block; text-decoration: none;">← Retour au jeu</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "simulateur/base.html" %}
+{% load static %}
+
+{% block title %}Cours Python — Exemple POO{% endblock %}
+
+{% block content %}
+<div class="section-card">
+    <div class="section-card-header header-dark" style="font-size:1.2rem;">
+        🎯 Partie 3 — Exemple complet : version POO de generateur.py
+    </div>
+    <div class="section-card-body">
+        <p class="lead" style="font-size:1rem;color:var(--text);margin-bottom:1.5rem;">
+            Réécriture du module <code>generateur.py</code> en utilisant la
+            <strong>Programmation Orientée Objet</strong>.
+        </p>
+
+        <h4 style="color:var(--gold);font-weight:700;margin-bottom:0.8rem;">1. Classe De</h4>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:0.5rem;"><code>import random
+
+class De:
+    """Représente un dé à 6 faces."""
+
+    NB_FACES = 6
+
+    def __init__(self):
+        self.valeur = 1
+
+    def lancer(self):
+        """Lance le dé et retourne la valeur obtenue (1-6)."""
+        self.valeur = random.randint(1, self.NB_FACES)
+        return self.valeur</code></pre>
+
+        <h4 style="color:var(--gold);font-weight:700;margin-bottom:0.8rem;">2. Classe LancerDouble</h4>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:0.5rem;"><code>class LancerDouble:
+    """Gère le lancer de deux dés et teste s'ils sont égaux."""
+
+    def __init__(self):
+        self.de1 = De()
+        self.de2 = De()
+        self.egaux = False
+        self.somme = 0
+
+    def effectuer(self):
+        """Lance les deux dés, retourne les valeurs et l'égalité."""
+        v1 = self.de1.lancer()
+        v2 = self.de2.lancer()
+        self.egaux = (v1 == v2)
+        self.somme = v1 + v2
+        return v1, v2, self.egaux, self.somme</code></pre>
+
+        <h4 style="color:var(--gold);font-weight:700;margin-bottom:0.8rem;">3. Classe Simulation</h4>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:0.5rem;"><code>class Simulation:
+    """Lance N lancers de deux dés et calcule la fréquence de doubles."""
+
+    def __init__(self, nb_experiences):
+        self.nb_experiences = nb_experiences
+        self.nb_doubles = 0
+        self.frequence = 0.0
+
+    def executer(self):
+        """Exécute la simulation complète."""
+        self.nb_doubles = 0
+        for _ in range(self.nb_experiences):
+            lancer = LancerDouble()
+            _, _, egaux, _ = lancer.effectuer()
+            if egaux:
+                self.nb_doubles += 1
+        self.frequence = self.nb_doubles / self.nb_experiences
+        return self.frequence</code></pre>
+
+        <h4 style="color:var(--gold);font-weight:700;margin-bottom:0.8rem;">4. Utilisation</h4>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem;"><code># Exemple d'utilisation
+simu = Simulation(10000)
+freq = simu.executer()
+print(f"Fréquence des doubles : {freq:.4f}")
+print(f"Probabilité théorique    : {1/6:.4f}")</code></pre>
+
+        <h4 style="color:var(--gold);font-weight:700;margin-bottom:0.8rem;">5. Avantages de la version POO</h4>
+        <ul style="line-height:2;">
+            <li><strong>Réutilisable</strong> : on peut créer plusieurs dés, simulations, etc.</li>
+            <li><strong>Extensible</strong> : facile d'ajouter un <code>DePondere</code> par héritage.</li>
+            <li><strong>Lisible</strong> : le code est organisé en blocs logiques.</li>
+            <li><strong>Testable</strong> : chaque classe peut être testée indépendamment.</li>
+            <li><strong>Maintenable</strong> : les modifications sont localisées dans une classe.</li>
+        </ul>
+
+        <div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:1rem;margin-top:1rem;">
+            <p style="margin:0;font-size:0.9rem;">
+                💡 <strong>Comparaison :</strong> la version procédurale de
+                <code>generateur.py</code> faisait tout avec des fonctions isolées.
+                La version POO regroupe données et comportements dans des classes,
+                ce qui facilite la réutilisation et l'extension.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mt-3" style="gap:1rem;">
+    <a href="{% url 'simulateur:cours_poo' %}" class="btn-game btn-outline">← Partie 2 : POO</a>
+    <a href="{% url 'simulateur:cours_index' %}" class="btn-game btn-secondary">Sommaire</a>
+</div>
+{% endblock %}

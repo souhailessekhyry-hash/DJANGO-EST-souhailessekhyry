@@ -1,0 +1,113 @@
+{% extends "simulateur/base.html" %}
+{% load static %}
+
+{% block title %}Cours Python — Exceptions{% endblock %}
+
+{% block content %}
+<div class="section-card">
+    <div class="section-card-header header-info" style="font-size:1.2rem;">
+        ⚠️ Partie 1 — Gestion des exceptions
+    </div>
+    <div class="section-card-body">
+        <p class="lead" style="font-size:1rem;color:var(--text);margin-bottom:1.5rem;">
+            Les <strong>exceptions</strong> sont des erreurs qui surviennent pendant
+            l'exécution d'un programme. Python permet de les <em>capturer</em> et de
+            les <em>traiter</em> pour éviter que le programme ne plante.
+        </p>
+
+        <h4 style="color:var(--cyan);font-weight:700;margin-bottom:0.8rem;">1. Le bloc try / except</h4>
+        <p style="margin-bottom:0.5rem;">
+            Le bloc <code>try</code> contient le code susceptible de générer une erreur.
+            Le bloc <code>except</code> permet de gérer l'erreur si elle se produit.
+        </p>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem;"><code>try:
+    # Code potentiellement dangereux
+    nombre = int(input("Entrez un nombre : "))
+    resultat = 10 / nombre
+    print(f"Résultat : {resultat}")
+except ZeroDivisionError:
+    # Gestion de l'erreur de division par zéro
+    print("Erreur : Division par zéro interdite !")
+except ValueError:
+    # Gestion de l'erreur de type incorrect
+    print("Erreur : Veuillez entrer un nombre valide.")</code></pre>
+
+        <h4 style="color:var(--cyan);font-weight:700;margin-bottom:0.8rem;">2. L'exception ValueError</h4>
+        <p style="margin-bottom:0.5rem;">
+            <code>ValueError</code> est levée quand une fonction reçoit un argument
+            de type correct mais de valeur inappropriée.
+        </p>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem;"><code># Exemple classique de ValueError
+try:
+    age = int(input("Quel âge avez-vous ? "))
+    if age &lt; 0:
+        raise ValueError("L'âge ne peut pas être négatif.")
+except ValueError as e:
+    print(f"Erreur : {e}")</code></pre>
+
+        <h4 style="color:var(--cyan);font-weight:700;margin-bottom:0.8rem;">3. Gestion des erreurs en Django</h4>
+        <p style="margin-bottom:0.5rem;">
+            Django offre plusieurs mécanismes pour gérer les erreurs
+            dans les vues et les templates :
+        </p>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:0.5rem;"><code># Dans une vue Django (views.py)
+from django.shortcuts import render, get_object_or_404
+from django.http import Http404
+
+def detail_simulation(request, simulation_id):
+    try:
+        simulation = SimulationResult.objects.get(id=simulation_id)
+    except SimulationResult.DoesNotExist:
+        raise Http404("Cette simulation n'existe pas.")
+    except Exception as e:
+        return render(request, "erreur.html", {"message": str(e)})
+    return render(request, "detail.html", {"simulation": simulation})</code></pre>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem;"><code># Dans les templates Django — filtres par défaut
+&lt;p&gt;{{ utilisateur.nom|default:"Anonyme" }}&lt;/p&gt;
+
+{% if erreur %}
+    &lt;div class="alert alert-danger"&gt;
+        {{ erreur }}
+    &lt;/div&gt;
+{% endif %}</code></pre>
+
+        <h4 style="color:var(--cyan);font-weight:700;margin-bottom:0.8rem;">4. Récapitulatif des exceptions courantes</h4>
+        <div style="overflow-x:auto;margin-bottom:1.5rem;">
+            <table class="simulation-table">
+                <thead>
+                    <tr><th>Exception</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>ValueError</code></td><td>Valeur incorrecte pour un type donné</td></tr>
+                    <tr><td><code>TypeError</code></td><td>Opération sur un type incompatible</td></tr>
+                    <tr><td><code>ZeroDivisionError</code></td><td>Division par zéro</td></tr>
+                    <tr><td><code>FileNotFoundError</code></td><td>Fichier introuvable</td></tr>
+                    <tr><td><code>IndexError</code></td><td>Indice de liste hors limites</td></tr>
+                    <tr><td><code>KeyError</code></td><td>Clé de dictionnaire introuvable</td></tr>
+                    <tr><td><code>ObjectDoesNotExist</code></td><td>Objet Django introuvable en base</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4 style="color:var(--cyan);font-weight:700;margin-bottom:0.8rem;">5. Exemple dans notre projet</h4>
+        <pre style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:12px;margin-bottom:0;"><code>def simulation_securisee(nb_experiences):
+    try:
+        if not isinstance(nb_experiences, int):
+            raise TypeError("Le nombre d'expériences doit être un entier.")
+        if nb_experiences &lt;= 0:
+            raise ValueError("Le nombre d'expériences doit être positif.")
+        return simulation(nb_experiences)
+    except TypeError as e:
+        print(f"Erreur de type : {e}")
+        return 0.0
+    except ValueError as e:
+        print(f"Erreur de valeur : {e}")
+        return 0.0</code></pre>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mt-3" style="gap:1rem;">
+    <a href="{% url 'simulateur:cours_index' %}" class="btn-game btn-outline">← Sommaire</a>
+    <a href="{% url 'simulateur:cours_poo' %}" class="btn-game btn-primary">Partie 2 : POO →</a>
+</div>
+{% endblock %}

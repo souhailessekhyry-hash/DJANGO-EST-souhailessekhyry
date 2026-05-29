@@ -1,0 +1,283 @@
+{% extends "simulateur/base.html" %}
+{% load static %}
+
+{% block title %}Party Dice — Jeu de dés multijoueur{% endblock %}
+
+{% block content %}
+
+<!-- Confetti canvas overlay -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ====== HERO ====== -->
+<div class="hero-section">
+    <h1 class="hero-title">🎲 Party Dice</h1>
+    <p class="hero-subtitle">
+        Lancez les dés, affrontez vos amis et découvrez la loi des grands nombres
+    </p>
+    <div class="hero-badge">
+        ⚡ P(double) = 1/6 ≈ 0.167
+    </div>
+</div>
+
+<!-- ====== GAME TABLE ====== -->
+<div class="game-section">
+    <div class="table-glow-ring"></div>
+    <div class="game-inner">
+        <div class="game-title">
+            <span class="glow-dot"></span>
+            TABLE DE JEU
+            <span class="glow-dot"></span>
+        </div>
+
+        <div class="row g-3">
+            <!-- LEFT: Player Panel -->
+            <div class="col-lg-4">
+                <div class="player-panel">
+                    <div class="player-panel-header">👥 Joueurs</div>
+
+                    <div class="player-input-group">
+                        <input type="text" id="player-name-input" placeholder="Nom du joueur" maxlength="20">
+                        <button class="btn-game btn-primary btn-sm" id="btn-add-player">+</button>
+                    </div>
+
+                    <div id="players-list">
+                        <div class="empty-state">
+                            Ajoutez au moins 2 joueurs
+                        </div>
+                    </div>
+
+                    <div id="active-player-display" class="active-indicator d-none">
+                        🎯 Au tour de <strong><span id="active-player-name"></span></strong>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-game btn-gold btn-lg" id="btn-game-lancer" disabled>
+                            🎲 LANCER
+                        </button>
+                        <button class="btn-game btn-outline btn-sm" id="btn-game-lancer10" disabled>
+                            ×10
+                        </button>
+                        <button class="btn-game btn-danger btn-sm" id="btn-game-reset" disabled>
+                            ↺
+                        </button>
+                    </div>
+
+                    <div id="player-select-buttons" class="player-select"></div>
+
+                    <div class="leaderboard-title">🏆 Classement</div>
+                    <div id="leaderboard">
+                        <div class="empty-state">En attente de joueurs...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Game Area -->
+            <div class="col-lg-8">
+                <!-- Dice -->
+                <div class="dice-container" id="dice-area">
+                    <div class="dice-wrapper">
+                        <div class="dice-box" id="game-dice1">
+                            <div class="dice-cube" id="cube1"></div>
+                        </div>
+                        <div class="dice-label">Dé 1</div>
+                    </div>
+                    <div class="dice-plus">+</div>
+                    <div class="dice-wrapper">
+                        <div class="dice-box" id="game-dice2">
+                            <div class="dice-cube" id="cube2"></div>
+                        </div>
+                        <div class="dice-label">Dé 2</div>
+                    </div>
+                </div>
+
+                <!-- Result -->
+                <div id="game-result" class="game-result">
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">👆 Ajoutez des joueurs et lancez les dés</span>
+                </div>
+
+                <!-- Stats HUD -->
+                <div class="stats-row">
+                    <div class="stat-card gold">
+                        <span class="stat-value gold" id="game-total">0</span>
+                        <span class="stat-label">Lancers</span>
+                    </div>
+                    <div class="stat-card green">
+                        <span class="stat-value green" id="game-succes">0</span>
+                        <span class="stat-label">Doubles</span>
+                    </div>
+                    <div class="stat-card cyan">
+                        <span class="stat-value cyan" id="game-freq">—</span>
+                        <span class="stat-label">Fréquence</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== THEORY ====== -->
+<div class="section-card">
+    <div class="section-card-header header-info">📖 La Loi des Grands Nombres</div>
+    <div class="section-card-body">
+        <div class="row">
+            <div class="col-lg-8">
+                <p>
+                    La <strong>loi des grands nombres</strong> est un théorème fondamental des probabilités :
+                    plus on répète une expérience, plus la <strong>fréquence</strong> observée se rapproche
+                    de la <strong>probabilité théorique</strong>.
+                </p>
+                <p>
+                    Avec deux dés à 6 faces, la probabilité d'obtenir une <strong>paire</strong> (même valeur) est :
+                </p>
+                <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; margin-bottom: 1rem;">
+                    <code style="font-size: 1rem;">
+                        P = 6 / 36 = <strong>1/6 ≈ 0.167</strong>
+                    </code>
+                </div>
+            </div>
+            <div class="col-lg-4 d-flex align-items-center justify-content-center">
+                <div style="text-align: center; background: rgba(0,0,0,0.15); padding: 1.5rem; border-radius: 16px;">
+                    <div style="font-size: 3rem; margin-bottom: 0.3rem;">🎲🎲</div>
+                    <div style="font-weight: 700; color: var(--text);">2 dés × 6 faces</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">36 combinaisons</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== SIMULATION ====== -->
+<div class="section-card">
+    <div class="section-card-header header-dark">📊 Convergence vers 0.167</div>
+    <div class="section-card-body">
+
+        <!-- Raw results table -->
+        <h5 style="color: var(--text); font-weight: 700; margin-bottom: 1rem; font-size: 0.9rem;">
+            🔟 Résultats de 10 lancers
+        </h5>
+        <div style="overflow-x: auto; margin-bottom: 2rem;">
+            <table class="simulation-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Dé 1</th>
+                        <th>Dé 2</th>
+                        <th>Résultat</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lancer in lancers_bruts %}
+                    <tr class="{% if lancer.egaux %}row-good{% endif %}">
+                        <td><strong>N°{{ forloop.counter }}</strong></td>
+                        <td style="font-size: 1.1rem;">
+                            {% if lancer.de1 == 1 %}⚀{% elif lancer.de1 == 2 %}⚁{% elif lancer.de1 == 3 %}⚂{% elif lancer.de1 == 4 %}⚃{% elif lancer.de1 == 5 %}⚄{% else %}⚅{% endif %}
+                            {{ lancer.de1 }}
+                        </td>
+                        <td style="font-size: 1.1rem;">
+                            {% if lancer.de2 == 1 %}⚀{% elif lancer.de2 == 2 %}⚁{% elif lancer.de2 == 3 %}⚂{% elif lancer.de2 == 4 %}⚃{% elif lancer.de2 == 5 %}⚄{% else %}⚅{% endif %}
+                            {{ lancer.de2 }}
+                        </td>
+                        <td>
+                            {% if lancer.egaux %}
+                                <span class="badge-proche">{{ lancer.de1 }} = {{ lancer.de2 }} ✓</span>
+                            {% else %}
+                                <span class="badge-loin">{{ lancer.de1 }} ≠ {{ lancer.de2 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if lancer.egaux %}
+                                <span style="color: var(--green); font-weight: 700;">✅ Paire</span>
+                            {% else %}
+                                <span style="color: var(--red);">❌</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Canvas Chart -->
+        <h5 style="color: var(--text); font-weight: 700; margin-bottom: 1rem; font-size: 0.9rem;">
+            📈 Convergence vers 1/6 ≈ {{ probabilite_theorique }}
+        </h5>
+        <div class="chart-container">
+            <canvas id="convergence-chart"></canvas>
+        </div>
+
+        <!-- Simulation table -->
+        <div style="overflow-x: auto;">
+            <table class="simulation-table">
+                <thead>
+                    <tr>
+                        <th>Lancers (N)</th>
+                        <th>Fréquence</th>
+                        <th>Théorique</th>
+                        <th>Écart</th>
+                        <th>Convergence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sim in simulations %}
+                    <tr class="{% if sim.taille >= 1000 %}row-good{% endif %}">
+                        <td><strong>{{ sim.taille }}</strong></td>
+                        <td style="font-weight: 700;">{{ sim.frequence }}</td>
+                        <td>{{ sim.theorique }}</td>
+                        <td>{{ sim.difference }}</td>
+                        <td>
+                            {% if sim.difference <= 0.01 %}
+                                <span class="badge-proche">✓ Très proche</span>
+                            {% elif sim.difference <= 0.05 %}
+                                <span class="badge-moyen">~ Proche</span>
+                            {% else %}
+                                <span class="badge-loin">⟳ Éloigné</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert-custom">
+            <strong>🔍 Observation :</strong>
+            Plus <em>N</em> grandit, plus la fréquence converge vers <strong>{{ probabilite_theorique }}</strong>.
+            C'est la <strong>loi des grands nombres</strong> en action !
+        </div>
+    </div>
+</div>
+
+<!-- ====== COURS LINK ====== -->
+<div class="cours-link-card">
+    <h4>📚 Apprendre Python & Django</h4>
+    <p>Programmation orientée objet, exceptions, et développement web.</p>
+    <a href="{% url 'simulateur:cours_index' %}">
+        📖 Voir le cours →
+    </a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.CHART_DATA = {{ chart_data_json|safe }};
+</script>
+
+<style>
+.empty-state {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+canvas#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+</style>
+{% endblock %}

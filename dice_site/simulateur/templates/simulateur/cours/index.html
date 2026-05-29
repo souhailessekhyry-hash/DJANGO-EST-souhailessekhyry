@@ -1,0 +1,67 @@
+{% extends "simulateur/base.html" %}
+{% load static %}
+
+{% block title %}Cours Python — Sommaire{% endblock %}
+
+{% block content %}
+<div class="hero-section" style="margin-bottom:1.5rem;">
+    <h1 class="hero-title">📚 Cours Python</h1>
+    <p class="hero-subtitle">Gestion des exceptions &amp; Programmation Orientée Objet</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <a href="{% url 'simulateur:cours_exceptions' %}" style="text-decoration:none;display:block;">
+            <div class="section-card" style="cursor:pointer;height:100%;">
+                <div class="section-card-header header-info" style="font-size:1.2rem;">⚠️ Partie 1</div>
+                <div class="section-card-body">
+                    <h4 style="color:var(--cyan);font-weight:700;margin-bottom:0.5rem;">Exceptions</h4>
+                    <p style="margin-bottom:0;font-size:0.85rem;">
+                        try / except, ValueError, gestion d'erreurs Django, tableau récapitulatif.
+                    </p>
+                    <div style="margin-top:1rem;color:var(--cyan);font-weight:600;font-size:0.85rem;">
+                        Commencer →</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'simulateur:cours_poo' %}" style="text-decoration:none;display:block;">
+            <div class="section-card" style="cursor:pointer;height:100%;">
+                <div class="section-card-header" style="font-size:1.2rem;color:var(--purple);background:rgba(139,92,246,0.06);">🧩 Partie 2</div>
+                <div class="section-card-body">
+                    <h4 style="color:var(--purple);font-weight:700;margin-bottom:0.5rem;">POO</h4>
+                    <p style="margin-bottom:0;font-size:0.85rem;">
+                        Classes, objets, attributs, méthodes, héritage, Django Models.
+                    </p>
+                    <div style="margin-top:1rem;color:var(--purple);font-weight:600;font-size:0.85rem;">
+                        Commencer →</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'simulateur:cours_exemple' %}" style="text-decoration:none;display:block;">
+            <div class="section-card" style="cursor:pointer;height:100%;">
+                <div class="section-card-header header-dark" style="font-size:1.2rem;">🎯 Partie 3</div>
+                <div class="section-card-body">
+                    <h4 style="color:var(--gold);font-weight:700;margin-bottom:0.5rem;">Exemple complet</h4>
+                    <p style="margin-bottom:0;font-size:0.85rem;">
+                        Réécriture de <code>generateur.py</code> en POO : classes De, LancerDouble, Simulation.
+                    </p>
+                    <div style="margin-top:1rem;color:var(--gold);font-weight:600;font-size:0.85rem;">
+                        Commencer →</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="{% url 'simulateur:accueil' %}" class="btn-game btn-outline">
+        ← Retour à l'accueil
+    </a>
+</div>
+{% endblock %}
